@@ -1,5 +1,5 @@
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+Copyright © 2019 Jesus Guerrero <jesusant.guerrero@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -98,11 +98,17 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	sendCmd.Flags().StringVarP(&email, "email", "e", "", "sender email")
-	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver email")
+	sendCmd.Flags().StringVarP(&email, "email", "e", "", "sender email (required)")
+	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver email (required)")
 	sendCmd.Flags().StringVarP(&message, "message", "m", "", "message")
-	sendCmd.Flags().StringVarP(&userName, "user", "u", "", "userName")
-	sendCmd.Flags().StringVarP(&order, "order", "o", "", "order")
+	sendCmd.Flags().StringVarP(&userName, "user", "u", "", "userName (required)")
+	sendCmd.Flags().StringVarP(&order, "order", "o", "", "order (required)")
+
+	sendCmd.MarkFlagRequired("email")
+	sendCmd.MarkFlagRequired("to")
+	sendCmd.MarkFlagRequired("user")
+	sendCmd.MarkFlagRequired("order")
+
 	flag.Parse()
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

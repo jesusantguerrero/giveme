@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"net/smtp"
 	"os"
-	"syscall"
 	"time"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"github.com/manifoldco/promptui"
 
 	"github.com/spf13/cobra"
 )
@@ -42,11 +41,24 @@ var sendCmd = &cobra.Command{
 			message = args[0]
 		}
 
+		if order == "" {
+			order = getOrder()
+		}
+
+		if email == "" {
+			getVarFromPrompt(&email, "Your Email")
+		}
+
+		if to == "" {
+			getVarFromPrompt(&to, "Receptor Email")
+		}
+
+		if userName == "" {
+			getVarFromPrompt(&userName, "Your name")
+		}
+
 		msgs := getMessage(message, userName, order)
-		fmt.Println("Your email password:")
-		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-		pass = string(bytePassword)
-		handleError(err)
+		pass = getPassword()
 		sendEmail(email, pass, []string{to}, msgs)
 
 		fmt.Println("message sent")
@@ -85,6 +97,39 @@ func getMessage(message string, userName string, order string) []byte {
 		"\r\n gracias, " + bye)
 }
 
+func getOrder() string {
+	prompt := promptui.SelectWithAdd{
+		Label:    "Select an order",
+		Items:    []string{"Tradicional", "Especial", "Ligero"},
+		AddLabel: "Another Order",
+	}
+
+	_, result, err := prompt.Run()
+	handleError(err)
+	return result
+}
+
+func getPassword() string {
+	prompt := promptui.Prompt{
+		Label: "Email Password:",
+		Mask:  '*',
+	}
+
+	bytePassword, err := prompt.Run()
+	handleError(err)
+	return bytePassword
+}
+
+func getVarFromPrompt(s *string, label string) {
+	prompt := promptui.Prompt{
+		Label: label,
+	}
+
+	value, err := prompt.Run()
+	handleError(err)
+	*s = value
+}
+
 func sendEmail(email string, pass string, to []string, msgs []byte) {
 	auth := smtp.PlainAuth("", email, pass, os.Getenv("emailhost"))
 	err := smtp.SendMail("smtp.gmail.com:587", auth, email, to, msgs)
@@ -103,12 +148,6 @@ func init() {
 	sendCmd.Flags().StringVarP(&message, "message", "m", "", "message")
 	sendCmd.Flags().StringVarP(&userName, "user", "u", "", "userName (required)")
 	sendCmd.Flags().StringVarP(&order, "order", "o", "", "order (required)")
-
-	sendCmd.MarkFlagRequired("email")
-	sendCmd.MarkFlagRequired("to")
-	sendCmd.MarkFlagRequired("user")
-	sendCmd.MarkFlagRequired("order")
-
 	flag.Parse()
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

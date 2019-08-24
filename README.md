@@ -2,7 +2,9 @@
 
 cli tool using go. to send emails and ask for my meals
 
-I want a command line app to order my meals. I have to send manualy an email each day to order them and I'd to doit in the cli without have to write so much
+## User stories
+
+I want a command line app to order my meals. I have to send manualy an email each day to order them and I'd to doit in the cli without have to write so much:
 
 - As a user I can choose between fixed menu or a custom order. not listed but available in the menu.
 - As a user a have to enter my email, receptor email, name to send the email.

@@ -11,6 +11,8 @@ I want a command line app to order my meals. I have to send manualy an email eac
 - As a user I want my last selections in memory and a command like send last order or something.
 
 # tools
-[cobra](https://github.com/spf13/cobra) - for the cli toolset
-[promptui](https://github.com/manifoldco/promptui) - for selects and advanced prompt labels
-smtp (native go package) - for emails
+- [cobra](https://github.com/spf13/cobra) - for the cli toolset
+
+- [promptui](https://github.com/manifoldco/promptui) - for selects and advanced prompt labels
+
+- smtp (native go package) - for emails

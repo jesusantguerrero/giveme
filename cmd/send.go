@@ -131,7 +131,7 @@ func getVarFromPrompt(s *string, label string) {
 }
 
 func sendEmail(email string, pass string, to []string, msgs []byte) {
-	auth := smtp.PlainAuth("", email, pass, os.Getenv("emailhost"))
+	auth := smtp.PlainAuth("", email, pass, "smtp.gmail.com")
 	err := smtp.SendMail("smtp.gmail.com:587", auth, email, to, msgs)
 	handleError(err)
 }

@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "giveme/cmd"
+import "github.com/jesusantguerrero/giveme/cmd"
 
 func main() {
 	cmd.Execute()

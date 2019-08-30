@@ -19,8 +19,9 @@ import (
 	"flag"
 	"fmt"
 	"net/smtp"
-	"os"
 	"time"
+
+	"github.com/spf13/viper"
 
 	"github.com/manifoldco/promptui"
 
@@ -28,6 +29,7 @@ import (
 )
 
 var email, to, pass, userName, message, order string
+var lastUsed bool
 
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
@@ -39,6 +41,10 @@ var sendCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			message = args[0]
+		}
+
+		if lastUsed {
+			setLastUsed()
 		}
 
 		if order == "" {
@@ -57,6 +63,7 @@ var sendCmd = &cobra.Command{
 			getVarFromPrompt(&userName, "Your name")
 		}
 
+		saveLastUsed(email, to, userName, order)
 		msgs := getMessage(message, userName, order)
 		pass = getPassword()
 		sendEmail(email, pass, []string{to}, msgs)
@@ -99,9 +106,10 @@ func getMessage(message string, userName string, order string) []byte {
 
 func getOrder() string {
 	prompt := promptui.SelectWithAdd{
-		Label:    "Select an order",
-		Items:    []string{"Tradicional", "Especial", "Ligero"},
-		AddLabel: "Another Order",
+		Label:     "Select an order",
+		Items:     []string{"Tradicional", "Especial", "Ligero"},
+		IsVimMode: false,
+		AddLabel:  "Another Order",
 	}
 
 	_, result, err := prompt.Run()
@@ -122,7 +130,8 @@ func getPassword() string {
 
 func getVarFromPrompt(s *string, label string) {
 	prompt := promptui.Prompt{
-		Label: label,
+		Label:     label,
+		IsVimMode: false,
 	}
 
 	value, err := prompt.Run()
@@ -131,9 +140,23 @@ func getVarFromPrompt(s *string, label string) {
 }
 
 func sendEmail(email string, pass string, to []string, msgs []byte) {
-	auth := smtp.PlainAuth("", email, pass, os.Getenv("emailhost"))
+	auth := smtp.PlainAuth("", email, pass, "smtp.gmail.com")
 	err := smtp.SendMail("smtp.gmail.com:587", auth, email, to, msgs)
 	handleError(err)
+}
+
+func saveLastUsed(email string, to string, userName string, order string) {
+	viper.Set("email", email)
+	viper.Set("to", to)
+	viper.Set("userName", userName)
+	viper.Set("order", order)
+}
+
+func setLastUsed() {
+	email = viper.GetString("email")
+	to = viper.GetString("to")
+	userName = viper.GetString("userName")
+	order = viper.GetString("order")
 }
 
 func init() {
@@ -143,11 +166,13 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	sendCmd.Flags().StringVarP(&email, "email", "e", "", "sender email (required)")
-	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver email (required)")
+	sendCmd.Flags().StringVarP(&email, "email", "e", "", "sender email")
+	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver email")
 	sendCmd.Flags().StringVarP(&message, "message", "m", "", "message")
-	sendCmd.Flags().StringVarP(&userName, "user", "u", "", "userName (required)")
-	sendCmd.Flags().StringVarP(&order, "order", "o", "", "order (required)")
+	sendCmd.Flags().StringVarP(&userName, "user", "u", "", "userName")
+	sendCmd.Flags().StringVarP(&order, "order", "o", "", "order ")
+	sendCmd.Flags().BoolVarP(&lastUsed, "last", "l", false, "last used")
+
 	flag.Parse()
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

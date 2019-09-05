@@ -48,27 +48,28 @@ var sendCmd = &cobra.Command{
 		}
 
 		if order == "" {
-			order = getOrder()
+			order = "hola" //getOrder()
 		}
 
 		if email == "" {
-			getVarFromPrompt(&email, "Your Email")
+			// getVarFromPrompt(&email, "Your Email")
+			email = "hola"
 		}
 
 		if to == "" {
-			getVarFromPrompt(&to, "Receptor Email")
+			to = "hola"
+			//getVarFromPrompt(&to, "Receptor Email")
 		}
 
 		if userName == "" {
-			getVarFromPrompt(&userName, "Your name")
+			userName = "hola"
+			// getVarFromPrompt(&userName, "Your name")
 		}
 
 		saveLastUsed(email, to, userName, order)
 		msgs := getMessage(message, userName, order)
 		pass = getPassword()
 		sendEmail(email, pass, []string{to}, msgs)
-
-		fmt.Println("message sent")
 	},
 }
 
@@ -143,20 +144,35 @@ func sendEmail(email string, pass string, to []string, msgs []byte) {
 	auth := smtp.PlainAuth("", email, pass, "smtp.gmail.com")
 	err := smtp.SendMail("smtp.gmail.com:587", auth, email, to, msgs)
 	handleError(err)
+
+	if err == nil {
+		fmt.Println("Message sent")
+	}
 }
 
 func saveLastUsed(email string, to string, userName string, order string) {
-	viper.Set("email", email)
-	viper.Set("to", to)
-	viper.Set("userName", userName)
-	viper.Set("order", order)
+	if email != "" {
+		viper.Set("giveme-email", email)
+	}
+
+	if to != "" {
+		viper.Set("giveme-to", to)
+	}
+
+	if userName != "" {
+		viper.Set("giveme-user", userName)
+	}
+
+	if order != "" {
+		viper.Set("giveme-order", order)
+	}
 }
 
 func setLastUsed() {
-	email = viper.GetString("email")
-	to = viper.GetString("to")
-	userName = viper.GetString("userName")
-	order = viper.GetString("order")
+	email = viper.GetString("giveme-email")
+	to = viper.GetString("giveme-to")
+	userName = viper.GetString("giveme-user")
+	order = viper.GetString("giveme-order")
 }
 
 func init() {
